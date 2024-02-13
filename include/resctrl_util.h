@@ -14,7 +14,7 @@
 #define CACHE_LINE_FORMAT(type) (type==CACHE_LINE_TYPE_CDP?"L%dCODE:%d=%%0%dlx%%s\n":"L%d:%d=%%0%dlx%%s\n")
 
 #define MAX_CPUS 2048
-#define CPU_LINE_BUF_SIZE 	2048
+#define LINE_BUF_SIZE 		2048
 #define RTLA_CPUF_RDT_A		0x1
 #define RTLA_CPUF_CAT_L3	0x2
 #define RTLA_CPUF_CAT_L2	0x4
@@ -36,14 +36,14 @@ struct cache_info {
 	int			cache_size;
 	int			number;
 	int			type;
-	unsigned int		*bimask;
+	unsigned int		*bitmask;
 	int16_t			*cache_id_map;
 };
 
 struct resctrl_info {
 	char			path[PATH_MAX];
-	struct cache_info	cache_l3;
-	struct cache_info	cache_l2;
+	struct cache_info	*cache_l3;
+	struct cache_info	*cache_l2;
 	char			resctl_name[8];
 
 };
@@ -140,3 +140,6 @@ uint64_t best_fitting_block(int mem_size, char* bitmask, int requested);
 
 int is_cache_line(char *line);
 uint64_t parse_hex(char *hex);
+struct resctrl_info *parse_cache(char *fn, struct resctrl_info *r);
+void parse_cacheid(char *line, struct cache_info *c);
+

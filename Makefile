@@ -1,26 +1,30 @@
+CC := gcc
+CFLAGS := -g -Wall
+LDFLAGS :=
 
+SRCDIR := src
+INCDIR := include
+BINDIR := bin
+TESTDIR := test
 
-bin/resctrl_util.o: src/resctrl_util.c include/resctrl_util.h
-	gcc -c src/resctrl_util.c  -o bin/resctrl_util.o
+SRCS := $(wildcard $(SRCDIR)/*.c)
+OBJS := $(patsubst $(SRCDIR)/%.c,$(BINDIR)/%.o,$(SRCS))
 
-test: bin/test_get_cache_ids_test bin/test_max_contiguos_mem_avail bin/test_cpu_features bin/test_is_cache_line bin/test_parse_hex
-	./test.sh
+TEST_SRCS := $(wildcard $(TESTDIR)/*.c)
+TEST_BINS := $(patsubst $(TESTDIR)/%.c,$(BINDIR)/%,$(TEST_SRCS))
 
-bin/test_get_cache_ids_test: test/test_get_cache_ids_test.c bin/resctrl_util.o
-	gcc test/test_get_cache_ids_test.c bin/resctrl_util.o -o bin/test_get_cache_ids_test
+.PHONY: all clean test
 
-bin/test_max_contiguos_mem_avail: test/test_max_contiguos_mem_avail.c bin/resctrl_util.o
-	gcc test/test_max_contiguos_mem_avail.c bin/resctrl_util.o -o bin/test_max_contiguos_mem_avail
+all: $(OBJS)
 
-bin/test_cpu_features: test/test_cpu_features.c bin/resctrl_util.o
-	gcc test/test_cpu_features.c bin/resctrl_util.o -o bin/test_cpu_features
+$(BINDIR)/%.o: $(SRCDIR)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@ $(LDFLAGS)
 
-bin/test_is_cache_line: test/test_is_cache_line.c bin/resctrl_util.o
-	gcc test/test_is_cache_line.c bin/resctrl_util.o -o bin/test_is_cache_line
+$(BINDIR)/%: $(TESTDIR)/%.c $(OBJS)
+	$(CC) $(CFLAGS) $< $(OBJS) -o $@ $(LDFLAGS)
 
-bin/test_parse_hex: test/test_parse_hex.c bin/resctrl_util.o
-	gcc test/test_parse_hex.c bin/resctrl_util.o -o bin/test_parse_hex
+test: $(TEST_BINS)
+	@./test.sh
 
 clean:
-	rm -rf bin/*.o bin/test_*
-
+	$(RM) -r $(BINDIR)/*.o $(TEST_BINS)

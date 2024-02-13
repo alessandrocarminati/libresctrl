@@ -5,4 +5,5 @@ result=success
 ./bin/test_is_cache_line >log/test_is_cache_line.log || result=fail
 ./bin/test_max_contiguos_mem_avail >log/test_max_contiguos_mem_avail.log || result=fail
 ./bin/test_parse_hex >log/test_parse_hex.log || result=fail
+./bin/test_parse_cacheid >log/test_parse_cacheid.log || result=fail
 echo $result

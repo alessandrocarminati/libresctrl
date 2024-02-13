@@ -1,0 +1,5 @@
+    MB:0=2048
+    L3CODE:0=ffff;1=ffff;2=fc00
+    L3DATA:0=ffff;1=ffff;2=fc00
+    L2CODE:0=ffff;1=ffff;2=fc00
+    L2DATA:0=ffff;1=ffff;2=fc00

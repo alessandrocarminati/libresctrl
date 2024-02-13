@@ -29,7 +29,7 @@ int nproc(void){
 }
 
 int parse_cpu_features(void) {
-	char line[CPU_LINE_BUF_SIZE];
+	char line[LINE_BUF_SIZE];
 	int features = 0;
 	FILE* file;
 
@@ -253,59 +253,108 @@ int is_cache_line(char *line) {
 	return NO_CACHE_LINE;
 }
 
-// Helper function to parse cache IDs and values and fill cache info
-/*
-struct cache_info *parse_cacheid(char *cacheid_seq) {
-    struct cache_info *cache = (struct cache_info*)malloc(sizeof(struct cache_info));
-    if (cache == NULL) {
-        fprintf(stderr, "Memory allocation failed\n");
-        exit(EXIT_FAILURE);
-    }
-    
-    char *token = strtok(cacheid_seq, ";");
-    int max_cache_id = 0;
-    while (token) {
-        int cache_id;
-        sscanf(token, "%d", &cache_id);
-        max_cache_id = cache_id > max_cache_id ? cache_id : max_cache_id;
-        token = strtok(NULL, ";");
-    }
-    cache->number = max_cache_id + 1;
+int count_items(char *line) {
+	int i=0, res=0;
+//	printf("count_items - line='%s'\n", line);
+	while (*(line+i++))
+		if (line[i]==';')
+			res++;
+//	printf("count_items - res=%d\n", res + 1);
+	return res + 1;
+}
 
-    cache->cache_id_map = (int16_t*)malloc((max_cache_id + 1) * sizeof(int16_t));
-    if (cache->cache_id_map == NULL) {
-        fprintf(stderr, "Memory allocation failed\n");
-        exit(EXIT_FAILURE);
-    }
-    memset(cache->cache_id_map, -1, (max_cache_id + 1) * sizeof(int16_t));
+char *fetch_item(char *line, struct cache_info *c) {
+	char *next_item;
+	char *left, *right=line;
+	int index;
 
-    // Fill cache ID map
-    token = strtok(cacheid_seq, ";");
-    while (token) {
-        int cache_id, value;
-        sscanf(token, "%d=%x", &cache_id, &value);
-        cache->cache_id_map[cache_id] = value;
-        token = strtok(NULL, ";");
-    }
+//	printf("fetch_item - line=\"%s\", line=%08lx, c=%08lx\n", line, line, c);
+	next_item = strchr(line, ';');
+//	printf("fetch_item - next_item=%08lx\n", next_item);
+	if (next_item) {
+		*next_item='\0';
+		next_item++;
+	}
 
-    return cache;
+	left = strchr(line, '=') + 1;
+//	printf("fetch_item - left=\"%s\", left=%08lx, left-1=%08lx -> %c\n", left, left, left-1, *(left-1));
+//	printf("fetch_item - right=\"%s\", right=%08lx,  left=\"%s\", left=%08lx\n", right, right, left, left);
+	*(left-1)='\0';
+//	printf("fetch_item - right=\"%s\", right=%08lx,  left=\"%s\", left=%08lx\n", right, right, left, left);
+	index = atoi(right);
+	c->bitmask[index] = parse_hex(left);
+
+	return next_item;
+}
+
+void parse_cacheid(char *input, struct cache_info *c) {
+	char *current, *line;
+
+	line = (char *) malloc(strlen(input)+1);
+	strcpy(line, input);
+
+//	printf("parse_cacheid - input=%08lx, line=%08lx\n", input, line);
+//	printf("parse_cacheid - c=%08lx\n", c);
+	c->number = count_items(line);
+//	printf("parse_cacheid - c->number=%d\n", c->number);
+	if (c->number <= 0)
+		return;
+
+	c->bitmask = (unsigned int*)malloc(sizeof(unsigned int)*c->number);
+//	printf("parse_cacheid - c->bitmask=%08lx\n", c->bitmask);
+	current=line;
+	while (*current!=':')
+		current++;
+	current++;
+//	printf("parse_cacheid - line=%08lx, current=%08lx\n", line, current);
+	while (current=fetch_item(current, c));
+	free(line);
 }
 
 // Function to parse the cache info from a file
-int parse_cache(FILE *f, struct resctrl_info *r) {
-    char line[MAX_LINE_LENGTH];
-    while (fgets(line, sizeof(line), f)) {
-        char *cache_data = is_cache_line(line);
-        if (cache_data != NULL) {
-            struct cache_info *cache = parse_cacheid(cache_data);
-            if (strncmp(line, "L3", 2) == 0) {
-                r->cache_l3 = *cache;
-            } else if (strncmp(line, "L2", 2) == 0) {
-                r->cache_l2 = *cache;
-            }
-            free(cache);
-        }
-    }
-    return 0;
+struct resctrl_info *parse_cache(char *fn, struct resctrl_info *r) {
+	struct cache_info *c;
+	char line[LINE_BUF_SIZE];
+	FILE *f;
+	int tmp;
+
+	r=NULL;
+	f = fopen(fn, "r");
+	if (f == NULL)
+		goto cleanup;
+
+	while (fgets(line, sizeof(line), f)) {
+		tmp = is_cache_line(line);
+		if (!tmp)
+			goto cleanup;
+
+		if (!r) {
+			r =(struct resctrl_info*)malloc(sizeof(struct resctrl_info));
+			if (r == NULL)
+				goto cleanup;
+			memset(r, 0, sizeof(struct resctrl_info) );
+		}
+
+		if (tmp==L3_LINE) {
+			r->cache_l3 = (struct cache_info*)malloc(sizeof(struct cache_info));
+			c=r->cache_l3;
+		} else {
+			r->cache_l2 = (struct cache_info*)malloc(sizeof(struct cache_info));
+			c=r->cache_l2;
+		}
+		parse_cacheid(line, c);
+	}
+	fclose(f);
+	return r;
+cleanup:
+	if (f)
+		fclose(f);
+	if (r) {
+		if (r->cache_l3)
+			free(r->cache_l3);
+		if (r->cache_l2)
+			free(r->cache_l2);
+	free(r);
+	}
+	return NULL;
 }
-*/
