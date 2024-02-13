@@ -26,7 +26,7 @@ int nproc(void){
 	}
 	return count;
 }
-/*
+
 int parse_cpu_features(void) {
 	char line[CPU_LINE_BUF_SIZE];
 	int features = 0;
@@ -34,8 +34,7 @@ int parse_cpu_features(void) {
 
 	file = fopen("/proc/cpuinfo", "r");
 	if (file == NULL) {
-		err_msg("Can not open /proc/cpuinfo");
-		exit(EXIT_FAILURE);
+		return features;
 	}
 
 	while (fgets(line, sizeof(line), file)) {
@@ -74,9 +73,8 @@ int parse_cpu_features(void) {
 	fclose(file);
 	return features;
 }
-*/
-void get_cache_ids(int16_t** cache_ids_l3, int16_t** cache_ids_l2, int num_cpus) {
-	int cpu_count = num_cpus;
+
+void get_cache_ids(int16_t** cache_ids_l3, int16_t** cache_ids_l2, int num_cpus) { int cpu_count = num_cpus;
 
 	*cache_ids_l3 = (int16_t*)malloc(cpu_count * sizeof(int16_t));
 	*cache_ids_l2 = (int16_t*)malloc(cpu_count * sizeof(int16_t));

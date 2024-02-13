@@ -1,9 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <inttypes.h>
-
 #include "../include/resctrl_util.h"
-
 int main(){
 	int16_t *cache_ids_l3;
 	int16_t *cache_ids_l2;

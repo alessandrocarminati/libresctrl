@@ -36,15 +36,12 @@ void main(){
 						{"0020", 2000, 0x0, 200}
 						};
 
-
 	printf("test max_contiguos_mem_avail() with %lu patterns\n",sizeof(max_avail_ptn)/sizeof(max_avail_ptn[0]));
 	for (i=0; i<sizeof(max_avail_ptn)/sizeof(max_avail_ptn[0]); i++){
 		max_size_blk = max_contiguos_mem_avail(max_avail_ptn[i].mem_size, max_avail_ptn[i].pattern, &num);
 		printf("[%s] - For max_avail_ptn = 0x%s (memsize=%lu), larger block is:%lu with mask=0x%04lx(expected 0x%04lx) \n", 
 			num==max_avail_ptn[i].expected?"OK":"KO", max_avail_ptn[i].pattern, max_avail_ptn[i].mem_size, max_size_blk, num, max_avail_ptn[i].expected);
 	}
-
-
 
 	printf("test best_fitting_block() with %lu patterns\n",sizeof(best_fit_ptn)/sizeof(best_fit_ptn[0]));
 	for (i=0; i<sizeof(best_fit_ptn)/sizeof(best_fit_ptn[0]); i++){
@@ -53,7 +50,4 @@ void main(){
 		printf("[%s] - Request %ld and memory state=%s ==> expect bitmask 0x%04lx and current bitmask= 0x%04lx \n", 
 			bit_mask==best_fit_ptn[i].expected?"OK":"KO", best_fit_ptn[i].requested, best_fit_ptn[i].pattern, best_fit_ptn[i].expected, bit_mask);
 	}
-
-
-
 }
