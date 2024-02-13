@@ -237,19 +237,22 @@ uint64_t parse_hex(char *hex) {
 int is_cache_line(char *line) {
 	char *tmp;
 
+//	printf("is_cache_line - enter line=0x%08lx\n", line);
 	while (*line && isspace(*line))
 		line++;
 
+//	printf("is_cache_line - skip white spaces line=0x%08lx\n", line);
 	tmp = strchr(line, ':');
 	if (tmp == NULL)
 		return NO_CACHE_LINE;
+
 
 	if ((strncmp(line, "L3:", 3) == 0) || (strncmp(line, "L3CODE:", 7) == 0))
 		return L3_LINE;
 
 	if ((strncmp(line, "L2:", 3) == 0) || (strncmp(line, "L2CODE:", 7) == 0))
 		return L2_LINE;
-
+	
 	return NO_CACHE_LINE;
 }
 
@@ -312,49 +315,73 @@ void parse_cacheid(char *input, struct cache_info *c) {
 }
 
 // Function to parse the cache info from a file
-struct resctrl_info *parse_cache(char *fn, struct resctrl_info *r) {
+struct resctrl_info *parse_cache(char *fn) {
+	struct resctrl_info *r;
 	struct cache_info *c;
 	char line[LINE_BUF_SIZE];
 	FILE *f;
 	int tmp;
 
+//	printf("parse_cache - fn=%s\n", fn);
 	r=NULL;
 	f = fopen(fn, "r");
 	if (f == NULL)
 		goto cleanup;
 
 	while (fgets(line, sizeof(line), f)) {
+//		printf("parse_cache.cycle - line='%s'\n", line);
 		tmp = is_cache_line(line);
 		if (!tmp)
-			goto cleanup;
-
+			continue;
+//		printf("parse_cache.cycle - Line is interesting\n");
 		if (!r) {
 			r =(struct resctrl_info*)malloc(sizeof(struct resctrl_info));
 			if (r == NULL)
 				goto cleanup;
 			memset(r, 0, sizeof(struct resctrl_info) );
+			strcpy(r->path, fn);
+//			printf("parse_cache.cycle - resctrl_info allocated and zeroed\n");
 		}
 
 		if (tmp==L3_LINE) {
+//			printf("parse_cache.cycle - l3 allocated\n");
 			r->cache_l3 = (struct cache_info*)malloc(sizeof(struct cache_info));
 			c=r->cache_l3;
 		} else {
+//			printf("parse_cache.cycle - l2 allocated\n");
 			r->cache_l2 = (struct cache_info*)malloc(sizeof(struct cache_info));
 			c=r->cache_l2;
 		}
+//		printf("parse_cache.cycle - line='%s'\n", line);
+		line[strlen(line)-1]='\0';
+//		printf("parse_cache.cycle - line='%s'\n", line);
 		parse_cacheid(line, c);
 	}
 	fclose(f);
 	return r;
 cleanup:
+//	printf("parse_cache - cleanup\n");
+
 	if (f)
 		fclose(f);
+
+	printf("parse_cache - file closed\n");
 	if (r) {
+//		printf("parse_cache - free\n");
 		if (r->cache_l3)
 			free(r->cache_l3);
 		if (r->cache_l2)
 			free(r->cache_l2);
-	free(r);
+		free(r);
 	}
+//	printf("parse_cache - return\n");
 	return NULL;
+}
+
+void dispose_resctrl_info(struct resctrl_info *r) {
+	if (r->cache_l3)
+		free(r->cache_l3);
+	if (r->cache_l2)
+		free(r->cache_l2);
+	 free(r);
 }

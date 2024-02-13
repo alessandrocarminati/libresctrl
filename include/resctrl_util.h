@@ -140,6 +140,7 @@ uint64_t best_fitting_block(int mem_size, char* bitmask, int requested);
 
 int is_cache_line(char *line);
 uint64_t parse_hex(char *hex);
-struct resctrl_info *parse_cache(char *fn, struct resctrl_info *r);
+struct resctrl_info *parse_cache(char *fn);
 void parse_cacheid(char *line, struct cache_info *c);
+void dispose_resctrl_info(struct resctrl_info *r);
 
