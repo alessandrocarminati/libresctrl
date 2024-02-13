@@ -17,5 +17,6 @@ int main(){
 	if (features & RTLA_CPUF_CQM_MBM_TOTAL)	printf("MBM (Memory Bandwidth Monitoring) - cqm_mbm_total\n");
 	if (features & RTLA_CPUF_CQM_MBM_LOCAL)	printf("MBM (Memory Bandwidth Monitoring) - cqm_mbm_local\n");
 	if (features & RTLA_CPUF_MBA)		printf("MBA (Memory Bandwidth Allocation) - mba\n");
+	return 0;
 }
 

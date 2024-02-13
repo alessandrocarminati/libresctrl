@@ -1,4 +1,4 @@
 bin/*.o
 bin/test_*
 *.swp
-
+log/*.log

@@ -6,6 +6,7 @@
 #include <inttypes.h>
 #include <string.h>
 #include <limits.h>
+#include <ctype.h>
 
 #include "../include/resctrl_util.h"
 
@@ -226,5 +227,85 @@ resctrl_info *cache_alloc_check_prerequisite(int requested){
 
 
 	return resctrl_path;
+}
+*/
+
+uint64_t parse_hex(char *hex) {
+	return (uint64_t)strtol(hex, NULL, 16);
+}
+
+int is_cache_line(char *line) {
+	char *tmp;
+
+	while (*line && isspace(*line))
+		line++;
+
+	tmp = strchr(line, ':');
+	if (tmp == NULL)
+		return NO_CACHE_LINE;
+
+	if ((strncmp(line, "L3:", 3) == 0) || (strncmp(line, "L3CODE:", 7) == 0))
+		return L3_LINE;
+
+	if ((strncmp(line, "L2:", 3) == 0) || (strncmp(line, "L2CODE:", 7) == 0))
+		return L2_LINE;
+
+	return NO_CACHE_LINE;
+}
+
+// Helper function to parse cache IDs and values and fill cache info
+/*
+struct cache_info *parse_cacheid(char *cacheid_seq) {
+    struct cache_info *cache = (struct cache_info*)malloc(sizeof(struct cache_info));
+    if (cache == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    char *token = strtok(cacheid_seq, ";");
+    int max_cache_id = 0;
+    while (token) {
+        int cache_id;
+        sscanf(token, "%d", &cache_id);
+        max_cache_id = cache_id > max_cache_id ? cache_id : max_cache_id;
+        token = strtok(NULL, ";");
+    }
+    cache->number = max_cache_id + 1;
+
+    cache->cache_id_map = (int16_t*)malloc((max_cache_id + 1) * sizeof(int16_t));
+    if (cache->cache_id_map == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(EXIT_FAILURE);
+    }
+    memset(cache->cache_id_map, -1, (max_cache_id + 1) * sizeof(int16_t));
+
+    // Fill cache ID map
+    token = strtok(cacheid_seq, ";");
+    while (token) {
+        int cache_id, value;
+        sscanf(token, "%d=%x", &cache_id, &value);
+        cache->cache_id_map[cache_id] = value;
+        token = strtok(NULL, ";");
+    }
+
+    return cache;
+}
+
+// Function to parse the cache info from a file
+int parse_cache(FILE *f, struct resctrl_info *r) {
+    char line[MAX_LINE_LENGTH];
+    while (fgets(line, sizeof(line), f)) {
+        char *cache_data = is_cache_line(line);
+        if (cache_data != NULL) {
+            struct cache_info *cache = parse_cacheid(cache_data);
+            if (strncmp(line, "L3", 2) == 0) {
+                r->cache_l3 = *cache;
+            } else if (strncmp(line, "L2", 2) == 0) {
+                r->cache_l2 = *cache;
+            }
+            free(cache);
+        }
+    }
+    return 0;
 }
 */

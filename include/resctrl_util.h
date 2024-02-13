@@ -26,6 +26,11 @@
 #define RTLA_CPUF_CQM_MBM_LOCAL	0x100
 #define RTLA_CPUF_MBA		0x200
 
+
+#define NO_CACHE_LINE		0
+#define L2_LINE			2
+#define L3_LINE			3
+
 struct cache_info {
 	bool			enabled;
 	int			cache_size;
@@ -130,3 +135,8 @@ int max_contiguos_mem_avail(int mem_size, char* bitmask, uint64_t *outmask);
  * @return The bitmask for the specified amount of memory if a suitable block is found; otherwise, 0.
  */
 uint64_t best_fitting_block(int mem_size, char* bitmask, int requested);
+
+
+
+int is_cache_line(char *line);
+uint64_t parse_hex(char *hex);

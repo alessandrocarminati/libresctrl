@@ -12,4 +12,5 @@ int main(){
 	for (i=1; i<n; i++) {
 		printf("Cache id %d l3=0x%02x, l2=0x%02x\n", i, cache_ids_l3[i], cache_ids_l2[i]);
 		}
+	return 0;
 }
