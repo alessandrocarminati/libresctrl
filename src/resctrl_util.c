@@ -297,28 +297,35 @@ cleanup:
 		fclose(f);
 
 	printf("parse_cache - file closed\n");
-	if (r) {
-		if (r->cache_l3)
-			free(r->cache_l3);
-		if (r->cache_l2)
-			free(r->cache_l2);
-		free(r);
-	}
+	dispose_resctrl_info(r);
 	return NULL;
 }
 
 void dispose_resctrl_info(struct resctrl_info *r) {
-	if (r->cache_l3){
-		if (r->cache_l3->bitmask)
-			free(r->cache_l3->bitmask);
-		free(r->cache_l3);
+	if (r) {
+		//check caches and free
+		if (r->cache_l3){
+			if (r->cache_l3->bitmask)
+				free(r->cache_l3->bitmask);
+			free(r->cache_l3);
+		}
+
+		if (r->cache_l2){
+			if (r->cache_l2->bitmask)
+				free(r->cache_l2->bitmask);
+			free(r->cache_l2);
+		}
+
+		//check maps and free
+		if (r->cache_id_map_l3)
+			 free(r->cache_id_map_l3);
+
+		if (r->cache_id_map_l2)
+			 free(r->cache_id_map_l2);
+
+		// free main object
+		free(r);
 	}
-	if (r->cache_l2){
-		if (r->cache_l2->bitmask)
-			free(r->cache_l2->bitmask);
-		free(r->cache_l2);
-	}
-	 free(r);
 }
 
 int convert_size(char *size_str) {
