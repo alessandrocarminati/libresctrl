@@ -10,9 +10,10 @@ int main(){
 	int i, n;
 
 	n = nproc();
-	get_cache_ids(&cache_ids_l3, &cache_ids_l2, n);
-	for (i=1; i<n; i++) {
-		printf("Cache id %d l3=0x%02x, l2=0x%02x\n", i, cache_ids_l3[i], cache_ids_l2[i]);
-		}
-	return 0;
+	if (get_cache_ids(&cache_ids_l3, &cache_ids_l2, n)){
+		for (i=1; i<n; i++)
+			printf("Cache id %d l3=0x%02x, l2=0x%02x\n", i, cache_ids_l3[i], cache_ids_l2[i]);
+		return 0;
+	}
+	return 1;
 }

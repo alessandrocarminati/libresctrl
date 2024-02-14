@@ -75,14 +75,13 @@ int parse_cpu_features(void) {
 	return features;
 }
 
-void get_cache_ids(int16_t** cache_ids_l3, int16_t** cache_ids_l2, int num_cpus) { int cpu_count = num_cpus;
+int get_cache_ids(int16_t** cache_ids_l3, int16_t** cache_ids_l2, int num_cpus) {
+	int cpu_count = num_cpus;
 
 	*cache_ids_l3 = (int16_t*)malloc(cpu_count * sizeof(int16_t));
 	*cache_ids_l2 = (int16_t*)malloc(cpu_count * sizeof(int16_t));
-	if (*cache_ids_l3 == NULL || *cache_ids_l2 == NULL) {
-		perror("Memory allocation error");
-		exit(EXIT_FAILURE);
-	}
+	if (*cache_ids_l3 == NULL || *cache_ids_l2 == NULL) 
+		return 0;
 
 	for (int idx = 0; idx < cpu_count; ++idx) {
 		char path_l3[256];
@@ -107,6 +106,7 @@ void get_cache_ids(int16_t** cache_ids_l3, int16_t** cache_ids_l2, int num_cpus)
 			(*cache_ids_l2)[idx] = -1;
 		}
 	}
+	return 1;
 }
 
 uint64_t make_bitmask(int max_sequence_end, int max_contiguous, int size) {

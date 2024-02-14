@@ -80,8 +80,9 @@ int parse_cpu_features(void);
  *                   This array will be allocated by the function and filled with cache IDs.
  * @param num_cpus     An integer specifying the number of CPUs in the system.
  *                   This determines the size of the arrays to allocate.
+ * @return 0 on failure
  */
-void get_cache_ids(int16_t** cache_ids_l3, int16_t** cache_ids_l2, int num_cpus);
+int get_cache_ids(int16_t** cache_ids_l3, int16_t** cache_ids_l2, int num_cpus);
 
 /**
  * @brief [make_bitmask] Generates a bitmask for a specific request.
