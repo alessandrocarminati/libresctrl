@@ -209,7 +209,7 @@ int is_cache_line(char *line) {
 	return NO_CACHE_LINE;
 }
 
-int count_items(char *line) {
+static int count_items(char *line) {
 	int i=0, res=0;
 	while (*(line+i++))
 		if (line[i]==';')
@@ -217,7 +217,7 @@ int count_items(char *line) {
 	return res + 1;
 }
 
-char *fetch_item(char *line, struct cache_info *c) {
+static char *fetch_item(char *line, struct cache_info *c) {
 	char *next_item;
 	char *left, *right=line;
 	int index;
