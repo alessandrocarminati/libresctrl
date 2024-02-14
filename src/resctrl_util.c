@@ -293,6 +293,10 @@ struct resctrl_info *parse_cache(char *fn) {
 			r->cache_l2 = (struct cache_info*)malloc(sizeof(struct cache_info));
 			c=r->cache_l2;
 		}
+		c->type=tmp & TYPE_MASK;
+		if (!get_cache_ids(&r->cache_id_map_l3, &r->cache_id_map_l2, nproc(), l2cacheid_path_fmt, l3cacheid_path_fmt))
+			goto cleanup;
+
 		line[strlen(line)-1]='\0';
 		parse_cacheid(line, c);
 	}
