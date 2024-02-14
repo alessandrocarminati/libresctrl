@@ -75,7 +75,7 @@ int parse_cpu_features(void) {
 	return features;
 }
 
-int get_cache_ids(int16_t** cache_ids_l3, int16_t** cache_ids_l2, int num_cpus) {
+int get_cache_ids(int16_t** cache_ids_l3, int16_t** cache_ids_l2, int num_cpus, char *fn_fmt_l2, char *fn_fmt_l3) {
 	int cpu_count = num_cpus;
 
 	*cache_ids_l3 = (int16_t*)malloc(cpu_count * sizeof(int16_t));
@@ -86,8 +86,8 @@ int get_cache_ids(int16_t** cache_ids_l3, int16_t** cache_ids_l2, int num_cpus) 
 	for (int idx = 0; idx < cpu_count; ++idx) {
 		char path_l3[256];
 		char path_l2[256];
-		snprintf(path_l3, sizeof(path_l3), "/sys/devices/system/cpu/cpu%d/cache/index3/id", idx);
-		snprintf(path_l2, sizeof(path_l2), "/sys/devices/system/cpu/cpu%d/cache/index2/id", idx);
+		snprintf(path_l3, sizeof(path_l3), fn_fmt_l2?fn_fmt_l3:CACHE_ID_PATH_FMT(3), idx);
+		snprintf(path_l2, sizeof(path_l2), fn_fmt_l2?fn_fmt_l2:CACHE_ID_PATH_FMT(2), idx);
 
 		FILE *file_l3 = fopen(path_l3, "r");
 		FILE *file_l2 = fopen(path_l2, "r");
@@ -262,7 +262,7 @@ void parse_cacheid(char *input, struct cache_info *c) {
 }
 
 // Function to parse the cache info from a file
-struct resctrl_info *parse_cache(char *fn) {
+struct resctrl_info *parse_cache(char *fn, char *l2cacheid_path_fmt, char *l3cacheid_path_fmt) {
 	struct resctrl_info *r;
 	struct cache_info *c;
 	char line[LINE_BUF_SIZE];

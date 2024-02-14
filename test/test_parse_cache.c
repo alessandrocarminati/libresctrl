@@ -60,7 +60,7 @@ int main() {
 	};
 
 	for (i=0; i< sizeof(ptn)/sizeof(struct parse_cache_ptn); i++) {
-		r = parse_cache(ptn[i].fn);
+		r = parse_cache(ptn[i].fn, NULL, NULL);
 		tmp = verify(r, &ptn[i]);
 		dispose_resctrl_info(r);
 		res = res && tmp;

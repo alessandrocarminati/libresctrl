@@ -26,7 +26,7 @@
 #define RTLA_CPUF_CQM_MBM_LOCAL	0x100
 #define RTLA_CPUF_MBA		0x200
 
-
+#define CACHE_ID_PATH_FMT(x)	((x==2)?"/sys/devices/system/cpu/cpu%d/cache/index2/id":"/sys/devices/system/cpu/cpu%d/cache/index3/id")
 #define NO_CACHE_LINE		0
 #define LINE_MASK		0x0F
 #define TYPE_MASK		0xF0
@@ -45,13 +45,14 @@ struct cache_info {
 	int			number;
 	int			type;
 	unsigned int		*bitmask;
-	int16_t			*cache_id_map;
 };
 
 struct resctrl_info {
 	char			path[PATH_MAX];
 	struct cache_info	*cache_l3;
 	struct cache_info	*cache_l2;
+	int16_t			*cache_id_map_l3;
+	int16_t			*cache_id_map_l2;
 	char			resctl_name[8];
 };
 
@@ -98,7 +99,7 @@ int parse_cpu_features(void);
  *                   This determines the size of the arrays to allocate.
  * @return 0 on failure
  */
-int get_cache_ids(int16_t** cache_ids_l3, int16_t** cache_ids_l2, int num_cpus);
+int get_cache_ids(int16_t** cache_ids_l3, int16_t** cache_ids_l2, int num_cpus, char *fn_fmt_l2, char *fn_fmt_l3);
 
 /**
  * @brief [make_bitmask] Generates a bitmask for a specific request.
