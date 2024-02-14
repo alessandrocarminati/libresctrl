@@ -262,7 +262,7 @@ void parse_cacheid(char *input, struct cache_info *c) {
 }
 
 // Function to parse the cache info from a file
-struct resctrl_info *parse_cache(char *fn, char *l2cacheid_path_fmt, char *l3cacheid_path_fmt) {
+struct resctrl_info *parse_cache(char *fn, int ncpu, char *l2cacheid_path_fmt, char *l3cacheid_path_fmt) {
 	struct resctrl_info *r;
 	struct cache_info *c;
 	char line[LINE_BUF_SIZE];
@@ -294,7 +294,7 @@ struct resctrl_info *parse_cache(char *fn, char *l2cacheid_path_fmt, char *l3cac
 			c=r->cache_l2;
 		}
 		c->type=tmp & TYPE_MASK;
-		if (!get_cache_ids(&r->cache_id_map_l3, &r->cache_id_map_l2, nproc(), l2cacheid_path_fmt, l3cacheid_path_fmt))
+		if (!get_cache_ids(&r->cache_id_map_l3, &r->cache_id_map_l2, ncpu, l2cacheid_path_fmt, l3cacheid_path_fmt))
 			goto cleanup;
 
 		line[strlen(line)-1]='\0';

@@ -193,7 +193,7 @@ uint64_t parse_hex(char *hex);
  * @note The returned object and all its subobjects must be freed using the
  *       dispose_resctrl_info function when no longer needed to prevent memory leaks.
  */
-struct resctrl_info *parse_cache(char *fn, char *l2cacheid_path_fmt, char *l3cacheid_path_fmt);
+struct resctrl_info *parse_cache(char *fn, int ncpu, char *l2cacheid_path_fmt, char *l3cacheid_path_fmt);
 
 /**
  * @brief [parse_cacheid] Parses a cache line string and fills a struct cache_info object.
@@ -236,3 +236,4 @@ void dispose_resctrl_info(struct resctrl_info *r);
  */
 int get_cache_size(int cpun, int level);
 
+int cpulevel2id(int cpu, int level, struct resctrl_info *r, int ncpu);
