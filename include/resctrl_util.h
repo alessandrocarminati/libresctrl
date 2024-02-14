@@ -40,7 +40,6 @@
 
 
 struct cache_info {
-	bool			enabled;
 	int			cache_size;
 	int			number;
 	int			type;
@@ -53,7 +52,6 @@ struct resctrl_info {
 	struct cache_info	*cache_l2;
 	int16_t			*cache_id_map_l3;
 	int16_t			*cache_id_map_l2;
-	char			resctl_name[8];
 };
 
 /**
