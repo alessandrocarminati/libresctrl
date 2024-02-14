@@ -14,9 +14,9 @@ int main() {
 	{"    L3:0=ffff", L3_LINE},
 	{"    L2:0=ffff", L2_LINE},
 	{"    L3DATA:0=ffff", NO_CACHE_LINE},
-	{"    L3CODE:0=ffff", L3_LINE},
+	{"    L3CODE:0=ffff", L3CODE_LINE},
 	{"    L2DATA:0=ffff", NO_CACHE_LINE},
-	{"    L2CODE:0=ffff", L2_LINE},
+	{"    L2CODE:0=ffff", L2CODE_LINE},
 	{"sbiriguto", NO_CACHE_LINE},
 	{"    antani:pippo", NO_CACHE_LINE}
 	};

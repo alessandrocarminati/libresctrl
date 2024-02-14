@@ -28,8 +28,16 @@
 
 
 #define NO_CACHE_LINE		0
-#define L2_LINE			2
-#define L3_LINE			3
+#define LINE_MASK		0x0F
+#define TYPE_MASK		0xF0
+
+#define L2_LINE			0x02
+#define L3_LINE			0x03
+#define L2CODE_LINE		0x12
+#define L3CODE_LINE		0x13
+#define MIXED_TYPE		0x00
+#define CODE_TYPE		0x10
+
 
 struct cache_info {
 	bool			enabled;

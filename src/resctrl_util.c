@@ -200,11 +200,17 @@ int is_cache_line(char *line) {
 		return NO_CACHE_LINE;
 
 
-	if ((strncmp(line, "L3:", 3) == 0) || (strncmp(line, "L3CODE:", 7) == 0))
+	if (strncmp(line, "L3:", 3) == 0)
 		return L3_LINE;
 
-	if ((strncmp(line, "L2:", 3) == 0) || (strncmp(line, "L2CODE:", 7) == 0))
+	if (strncmp(line, "L3CODE:", 7) == 0)
+		return L3CODE_LINE;
+
+	if (strncmp(line, "L2:", 3) == 0)
 		return L2_LINE;
+
+	if (strncmp(line, "L2CODE:", 7) == 0)
+		return L2CODE_LINE;
 
 	return NO_CACHE_LINE;
 }
@@ -280,7 +286,7 @@ struct resctrl_info *parse_cache(char *fn) {
 			strcpy(r->path, fn);
 		}
 
-		if (tmp==L3_LINE) {
+		if ((tmp & LINE_MASK)==L3_LINE) {
 			r->cache_l3 = (struct cache_info*)malloc(sizeof(struct cache_info));
 			c=r->cache_l3;
 		} else {
