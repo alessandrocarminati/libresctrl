@@ -308,9 +308,15 @@ cleanup:
 }
 
 void dispose_resctrl_info(struct resctrl_info *r) {
-	if (r->cache_l3)
+	if (r->cache_l3){
+		if (r->cache_l3->bitmask)
+			free(r->cache_l3->bitmask);
 		free(r->cache_l3);
-	if (r->cache_l2)
+	}
+	if (r->cache_l2){
+		if (r->cache_l2->bitmask)
+			free(r->cache_l2->bitmask);
 		free(r->cache_l2);
+	}
 	 free(r);
 }
