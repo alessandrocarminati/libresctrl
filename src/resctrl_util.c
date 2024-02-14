@@ -378,3 +378,19 @@ int get_cache_size(int cpun, int level){
 	return -1;
 }
 
+int cpulevel2id(int cpu, int level, struct resctrl_info *r, int ncpu) {
+	int16_t                 *c;
+
+	if ((level!=2) && (level!=3))
+		return -1;
+
+	c=(level==2)?r->cache_id_map_l2:r->cache_id_map_l3;
+	if (!c)
+		return -1;
+
+	if (cpu>ncpu)
+		return -1;
+
+	return c[cpu];
+}
+
