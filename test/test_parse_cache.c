@@ -34,20 +34,12 @@ int min(int a, int b) {
 int verify(struct resctrl_info *r, struct parse_cache_ptn *ptn){
 	int path, caches_n, l3_num, l2_num, l3_data, l2_data, res;
 
-//	printf("verify - r->path='%s'\n",r->path);
-//	printf("verify - ptn->fn='%s'\n",ptn->fn);
 	path = strcmp(r->path, ptn->fn)==0;
-//	printf("verify - path='%s'\n", BOOL2STR(path));
 	caches_n = ptn->expected_caches == ((r->cache_l3!=NULL)+(r->cache_l2!=NULL));
-//	printf("verify - caches_n='%s'\n", BOOL2STR(caches_n));
 	l3_num = r->cache_l3?ptn->expected_number_l3 == r->cache_l3->number:1;
-//	printf("verify - l3_num='%s'\n", BOOL2STR(l3_num));
 	l2_num = r->cache_l2?ptn->expected_number_l2 == r->cache_l2->number:1;
-//	printf("verify - l2_num='%s'\n", BOOL2STR(l2_num));
 	l3_data = r->cache_l3?verdata(ptn->expected_data_l3, r->cache_l3->bitmask, min(ptn->expected_number_l3, r->cache_l3->number)):1;
-//	printf("verify - l3_data='%s'\n", BOOL2STR(l3_data));
 	l2_data = r->cache_l2?verdata(ptn->expected_data_l2, r->cache_l2->bitmask, min(ptn->expected_number_l2, r->cache_l2->number)):1;
-//	printf("verify - l2_data='%s'\n", BOOL2STR(l2_data));
 	res = path && caches_n && l3_num && l2_num && l3_data && l2_data;
 	printf("[%s] - Test_file='%s' ==> path->%s, caches_n->%s, l3_num=%s, l2_num->%s, l3_data->%s, l2_data->%s\n",
 		BOOL2STR(res), ptn->fn, BOOL2STR(path), BOOL2STR(caches_n), BOOL2STR(l3_num), BOOL2STR(l2_num), BOOL2STR(l3_data), BOOL2STR(l2_data));
@@ -69,7 +61,6 @@ int main() {
 
 	for (i=0; i< sizeof(ptn)/sizeof(struct parse_cache_ptn); i++) {
 		r = parse_cache(ptn[i].fn);
-//		printf("main - parse_cache ok\n");
 		tmp = verify(r, &ptn[i]);
 		dispose_resctrl_info(r);
 		res = res && tmp;

@@ -185,51 +185,6 @@ uint64_t best_fitting_block(int mem_size, char* bitmask, int requested) {
 	return make_bitmask(best_sequence_end, requested / bin_size + 1, num_bits);
 }
 
-
-/**
- * cache_alloc_check_prerequisite - verifies prerequisites for cache-alloc
- * are met, if anything's missing stops execution.
- *
- * on success, returns the path where the resctrl filesystem is mounted.
- */
-/*
-resctrl_info *cache_alloc_check_prerequisite(int requested){
-	int cpu_features;
-	char *resctrl_path;
-
-	resctrl_path = malloc(MAX_PATH);
-	if (!resctrl_path) {
-		err_msg("Can't allocate memory\n");
-		exit(EXIT_FAILURE);
-	}
-	cpu_features = parse_cpu_features();
-	if (!(cpu_features & RTLA_CPUF_CAT_L3)) {
-		err_msg("Resource Control features not supported on this system\n");
-		exit(EXIT_FAILURE);
-	}
-	retval = find_mount("resctrl", resctrl_path, sizeof(resctrl_path));
-	if (!retval) {
-		err_msg("Did not find resctrl mount point\n");
-		exit(EXIT_FAILURE);
-	}
-
-	file = fopen("/sys/fs/resctrl/schemata", "r");
-	if (file == NULL) {
-		err_msg("Failed to access /sys/fs/resctrl/schemata\n");
-		exit(EXIT_FAILURE);
-	}
-	while (fgets(buffer, sizeof(buffer), file)) {
-		reti = regcomp(&regex, CACHE_LINE_REGEX, REG_EXTENDED);
-		if (reti) {
-			err_msg("Could not compile regex\n");
-			exit(EXIT_FAILURE);
-		}
-
-
-	return resctrl_path;
-}
-*/
-
 uint64_t parse_hex(char *hex) {
 	return (uint64_t)strtol(hex, NULL, 16);
 }
@@ -237,11 +192,9 @@ uint64_t parse_hex(char *hex) {
 int is_cache_line(char *line) {
 	char *tmp;
 
-//	printf("is_cache_line - enter line=0x%08lx\n", line);
 	while (*line && isspace(*line))
 		line++;
 
-//	printf("is_cache_line - skip white spaces line=0x%08lx\n", line);
 	tmp = strchr(line, ':');
 	if (tmp == NULL)
 		return NO_CACHE_LINE;
@@ -252,17 +205,15 @@ int is_cache_line(char *line) {
 
 	if ((strncmp(line, "L2:", 3) == 0) || (strncmp(line, "L2CODE:", 7) == 0))
 		return L2_LINE;
-	
+
 	return NO_CACHE_LINE;
 }
 
 int count_items(char *line) {
 	int i=0, res=0;
-//	printf("count_items - line='%s'\n", line);
 	while (*(line+i++))
 		if (line[i]==';')
 			res++;
-//	printf("count_items - res=%d\n", res + 1);
 	return res + 1;
 }
 
@@ -271,19 +222,14 @@ char *fetch_item(char *line, struct cache_info *c) {
 	char *left, *right=line;
 	int index;
 
-//	printf("fetch_item - line=\"%s\", line=%08lx, c=%08lx\n", line, line, c);
 	next_item = strchr(line, ';');
-//	printf("fetch_item - next_item=%08lx\n", next_item);
 	if (next_item) {
 		*next_item='\0';
 		next_item++;
 	}
 
 	left = strchr(line, '=') + 1;
-//	printf("fetch_item - left=\"%s\", left=%08lx, left-1=%08lx -> %c\n", left, left, left-1, *(left-1));
-//	printf("fetch_item - right=\"%s\", right=%08lx,  left=\"%s\", left=%08lx\n", right, right, left, left);
 	*(left-1)='\0';
-//	printf("fetch_item - right=\"%s\", right=%08lx,  left=\"%s\", left=%08lx\n", right, right, left, left);
 	index = atoi(right);
 	c->bitmask[index] = parse_hex(left);
 
@@ -296,20 +242,15 @@ void parse_cacheid(char *input, struct cache_info *c) {
 	line = (char *) malloc(strlen(input)+1);
 	strcpy(line, input);
 
-//	printf("parse_cacheid - input=%08lx, line=%08lx\n", input, line);
-//	printf("parse_cacheid - c=%08lx\n", c);
 	c->number = count_items(line);
-//	printf("parse_cacheid - c->number=%d\n", c->number);
 	if (c->number <= 0)
 		return;
 
 	c->bitmask = (unsigned int*)malloc(sizeof(unsigned int)*c->number);
-//	printf("parse_cacheid - c->bitmask=%08lx\n", c->bitmask);
 	current=line;
 	while (*current!=':')
 		current++;
 	current++;
-//	printf("parse_cacheid - line=%08lx, current=%08lx\n", line, current);
 	while (current=fetch_item(current, c));
 	free(line);
 }
@@ -322,59 +263,47 @@ struct resctrl_info *parse_cache(char *fn) {
 	FILE *f;
 	int tmp;
 
-//	printf("parse_cache - fn=%s\n", fn);
 	r=NULL;
 	f = fopen(fn, "r");
 	if (f == NULL)
 		goto cleanup;
 
 	while (fgets(line, sizeof(line), f)) {
-//		printf("parse_cache.cycle - line='%s'\n", line);
 		tmp = is_cache_line(line);
 		if (!tmp)
 			continue;
-//		printf("parse_cache.cycle - Line is interesting\n");
 		if (!r) {
 			r =(struct resctrl_info*)malloc(sizeof(struct resctrl_info));
 			if (r == NULL)
 				goto cleanup;
 			memset(r, 0, sizeof(struct resctrl_info) );
 			strcpy(r->path, fn);
-//			printf("parse_cache.cycle - resctrl_info allocated and zeroed\n");
 		}
 
 		if (tmp==L3_LINE) {
-//			printf("parse_cache.cycle - l3 allocated\n");
 			r->cache_l3 = (struct cache_info*)malloc(sizeof(struct cache_info));
 			c=r->cache_l3;
 		} else {
-//			printf("parse_cache.cycle - l2 allocated\n");
 			r->cache_l2 = (struct cache_info*)malloc(sizeof(struct cache_info));
 			c=r->cache_l2;
 		}
-//		printf("parse_cache.cycle - line='%s'\n", line);
 		line[strlen(line)-1]='\0';
-//		printf("parse_cache.cycle - line='%s'\n", line);
 		parse_cacheid(line, c);
 	}
 	fclose(f);
 	return r;
 cleanup:
-//	printf("parse_cache - cleanup\n");
-
 	if (f)
 		fclose(f);
 
 	printf("parse_cache - file closed\n");
 	if (r) {
-//		printf("parse_cache - free\n");
 		if (r->cache_l3)
 			free(r->cache_l3);
 		if (r->cache_l2)
 			free(r->cache_l2);
 		free(r);
 	}
-//	printf("parse_cache - return\n");
 	return NULL;
 }
 
