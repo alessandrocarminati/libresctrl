@@ -144,4 +144,5 @@ uint64_t parse_hex(char *hex);
 struct resctrl_info *parse_cache(char *fn);
 void parse_cacheid(char *line, struct cache_info *c);
 void dispose_resctrl_info(struct resctrl_info *r);
+int get_cache_size(int cpun, int level);
 

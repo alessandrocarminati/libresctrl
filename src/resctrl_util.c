@@ -320,3 +320,44 @@ void dispose_resctrl_info(struct resctrl_info *r) {
 	}
 	 free(r);
 }
+
+int convert_size(char *size_str) {
+	int multiplier = 1;
+
+	if (isalpha(size_str[strlen(size_str)-1])) {
+		switch (tolower(size_str[strlen(size_str)-1])) {
+			case 'g':
+				multiplier *= 1024;
+			case 'm':
+				multiplier *= 1024;
+			case 'k':
+				multiplier *= 1024;
+		}
+		size_str[strlen(size_str)]='\0';
+	}
+	int size = atoi(size_str);
+	return size * multiplier;
+}
+
+int get_cache_size(int cpun, int level){
+	char fn[50];
+	char buffer[50];
+	FILE *f;
+
+	if ((level==3) || (level==2)) {
+		snprintf(fn, sizeof(fn), "/sys/devices/system/cpu/cpu%d/cache/index%d/size", cpun, level);
+		f = fopen(fn, "r");
+		 if (f == NULL)
+			return -1;
+
+		if (fscanf(f, "%19s", buffer) != 1) {
+			fclose(f);
+			return -1;
+		}
+
+		fclose(f);
+		return convert_size(buffer);
+	}
+	return -1;
+}
+
