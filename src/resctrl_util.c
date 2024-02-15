@@ -388,7 +388,7 @@ int cpulevel2id(int cpu, int level, struct resctrl_info *r) {
 	if (!c)
 		return -1;
 
-	if (cpu>ncpu)
+	if (cpu > r->ncpu)
 		return -1;
 
 	return c[cpu];
