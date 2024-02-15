@@ -41,7 +41,7 @@ int main() {
 
 	for (i=0; i< sizeof(ptn)/sizeof(struct test_ptn); i++) {
 		r = parse_cache(ptn[i].fn, ptn[i].ncpu, ptn[i].l2cacheid_fmt, ptn[i].l3cacheid_fmt);
-		tmp = cpulevel2id(ptn[i].cpu, ptn[i].level, r, ptn[i].ncpu);
+		tmp = cpulevel2id(ptn[i].cpu, ptn[i].level, r);
 		printf("[%s] - cpu=%d, level=%d => cacheid=%d expected=%d\n", BOOL2STR(tmp==ptn[i].expected_caches), ptn[i].cpu, ptn[i].level, tmp, ptn[i].expected_caches);
 //		for (int j=0; j<ptn[i].ncpu; j++) printf("%d ", r->cache_id_map_l2[j]); printf("\n");
 //		for (int j=0; j<ptn[i].ncpu; j++) printf("%d ", r->cache_id_map_l3[j]); printf("\n");

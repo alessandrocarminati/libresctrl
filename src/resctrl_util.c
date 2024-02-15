@@ -75,15 +75,14 @@ int parse_cpu_features(void) {
 	return features;
 }
 
-int get_cache_ids(int16_t** cache_ids_l3, int16_t** cache_ids_l2, int num_cpus, char *fn_fmt_l2, char *fn_fmt_l3) {
-	int cpu_count = num_cpus;
+int get_cache_ids(struct resctrl_info *r, char *fn_fmt_l2, char *fn_fmt_l3) {
 
-	*cache_ids_l3 = (int16_t*)malloc(cpu_count * sizeof(int16_t));
-	*cache_ids_l2 = (int16_t*)malloc(cpu_count * sizeof(int16_t));
-	if (*cache_ids_l3 == NULL || *cache_ids_l2 == NULL) 
+	r->cache_id_map_l3 = (int16_t*)malloc(r->ncpu * sizeof(int16_t));
+	r->cache_id_map_l2 = (int16_t*)malloc(r->ncpu * sizeof(int16_t));
+	if (r->cache_id_map_l3 == NULL || r->cache_id_map_l2 == NULL)
 		return 0;
 
-	for (int idx = 0; idx < cpu_count; ++idx) {
+	for (int idx = 0; idx < r->ncpu; ++idx) {
 		char path_l3[256];
 		char path_l2[256];
 		snprintf(path_l3, sizeof(path_l3), fn_fmt_l2?fn_fmt_l3:CACHE_ID_PATH_FMT(3), idx);
@@ -93,17 +92,17 @@ int get_cache_ids(int16_t** cache_ids_l3, int16_t** cache_ids_l2, int num_cpus, 
 		FILE *file_l2 = fopen(path_l2, "r");
 
 		if (file_l3 != NULL) {
-			fscanf(file_l3, "%" SCNd16, &((*cache_ids_l3)[idx]));
+			fscanf(file_l3, "%" SCNd16, &(r->cache_id_map_l3[idx]));
 			fclose(file_l3);
 		} else {
-			(*cache_ids_l3)[idx] = -1;
+			r->cache_id_map_l3[idx] = -1;
 		}
 
 		if (file_l2 != NULL) {
-			fscanf(file_l2, "%" SCNd16, &((*cache_ids_l2)[idx]));
+			fscanf(file_l2, "%" SCNd16, &(r->cache_id_map_l2[idx]));
 			fclose(file_l2);
 		} else {
-			(*cache_ids_l2)[idx] = -1;
+			r->cache_id_map_l2[idx] = -1;
 		}
 	}
 	return 1;
@@ -284,6 +283,7 @@ struct resctrl_info *parse_cache(char *fn, int ncpu, char *l2cacheid_path_fmt, c
 				goto cleanup;
 			memset(r, 0, sizeof(struct resctrl_info) );
 			strcpy(r->path, fn);
+			r->ncpu = ncpu;
 		}
 
 		if ((tmp & LINE_MASK)==L3_LINE) {
@@ -294,7 +294,7 @@ struct resctrl_info *parse_cache(char *fn, int ncpu, char *l2cacheid_path_fmt, c
 			c=r->cache_l2;
 		}
 		c->type=tmp & TYPE_MASK;
-		if (!get_cache_ids(&r->cache_id_map_l3, &r->cache_id_map_l2, ncpu, l2cacheid_path_fmt, l3cacheid_path_fmt))
+		if (!get_cache_ids(r, l2cacheid_path_fmt, l3cacheid_path_fmt))
 			goto cleanup;
 
 		line[strlen(line)-1]='\0';
@@ -378,7 +378,7 @@ int get_cache_size(int cpun, int level){
 	return -1;
 }
 
-int cpulevel2id(int cpu, int level, struct resctrl_info *r, int ncpu) {
+int cpulevel2id(int cpu, int level, struct resctrl_info *r) {
 	int16_t                 *c;
 
 	if ((level!=2) && (level!=3))

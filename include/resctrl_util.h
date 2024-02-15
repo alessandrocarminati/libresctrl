@@ -48,6 +48,7 @@ struct cache_info {
 
 struct resctrl_info {
 	char			path[PATH_MAX];
+	int			ncpu;
 	struct cache_info	*cache_l3;
 	struct cache_info	*cache_l2;
 	int16_t			*cache_id_map_l3;
@@ -97,7 +98,7 @@ int parse_cpu_features(void);
  *                   This determines the size of the arrays to allocate.
  * @return 0 on failure
  */
-int get_cache_ids(int16_t** cache_ids_l3, int16_t** cache_ids_l2, int num_cpus, char *fn_fmt_l2, char *fn_fmt_l3);
+int get_cache_ids(struct resctrl_info *r, char *fn_fmt_l2, char *fn_fmt_l3);
 
 /**
  * @brief [make_bitmask] Generates a bitmask for a specific request.
@@ -236,4 +237,4 @@ void dispose_resctrl_info(struct resctrl_info *r);
  */
 int get_cache_size(int cpun, int level);
 
-int cpulevel2id(int cpu, int level, struct resctrl_info *r, int ncpu);
+int cpulevel2id(int cpu, int level, struct resctrl_info *r);
