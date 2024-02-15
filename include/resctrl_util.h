@@ -38,6 +38,9 @@
 #define MIXED_TYPE		0x00
 #define CODE_TYPE		0x10
 
+#define ERR_STR			-1
+#define ERR_NO_CACHE		-2
+
 
 struct cache_info {
 	int			cache_size;
@@ -238,3 +241,4 @@ void dispose_resctrl_info(struct resctrl_info *r);
 int get_cache_size(int cpun, int level);
 
 int cpulevel2id(int cpu, int level, struct resctrl_info *r);
+char *create_req_str(struct resctrl_info *r, uint64_t bitmask, int level, int cacheid);

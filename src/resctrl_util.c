@@ -394,3 +394,28 @@ int cpulevel2id(int cpu, int level, struct resctrl_info *r) {
 	return c[cpu];
 }
 
+char *create_req_str(struct resctrl_info *r, uint64_t bitmask, int level, int cacheid){
+	char 			*res;
+	char 			fmt[40];
+	char 			buf[LINE_BUF_SIZE];
+	struct cache_info	*c = (level==2)?r->cache_l2:r->cache_l3;
+	int			i, pos = 0;
+
+	if (!c)
+		return NULL;
+
+	if (((level!=2) && (level!=3))||(cacheid>=c->number))
+		return NULL;
+
+	res = (char *)malloc(LINE_BUF_SIZE);
+	if (!res)
+		return NULL;
+
+	snprintf(fmt, sizeof(fmt), c->type==CODE_TYPE?"L%dCODE:%%s":"L%d:%%s", level);
+	for (i=0; i<c->number; i++)
+		pos += snprintf(buf+pos, sizeof(buf)-pos, "%d=%04lx;", i, (i==cacheid)?bitmask:c->bitmask[i]);
+
+	snprintf(res, LINE_BUF_SIZE, fmt, buf);
+	res[strlen(res)-1] = '\0';
+	return res;
+}
